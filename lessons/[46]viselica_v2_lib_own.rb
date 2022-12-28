@@ -1,6 +1,6 @@
 class Game
 
-  def initialize #Создаю нужные переменные
+  def initialize
     @uncorrect_letters = [] 
     @correct_letters = [] 
     @error_counter = 0 
@@ -10,7 +10,7 @@ class Game
     @hints = 0
   end
 
-  def hints #Делаю геттеры, чтобы понимать значение переменной класса вне класса
+  def hints
     return @hints.to_s
   end
 
@@ -35,23 +35,24 @@ class Game
   end
 
   def word_from_file 
-    words_path = "/data/words.txt"
+    current_path = File.dirname(__FILE__)
+    words_path = current_path + "/data/words.txt"
 
-    if File.exist?(words_path) #Если файл существует - продолжаем, нету - стопается прога и выводится текстовое оповещение
+    if File.exist?(words_path)
       words = File.new(words_path, "r:UTF-8")
-      @word = words.readlines.sample.chomp.split("") #Загрузка строк текстового файла в массив
-      words.close #Не забыл закрыть!
+      @word = words.readlines.sample.chomp.split("")
+      words.close
     else
-      abort "Word store not found."
+      puts "Word store not found."
     end
   end
 
   def check_result(bukva) 
-    if @status == 2 || @status == 1 #Если статус игры победа или заканчиваются попытки - метод ничего не возвращает
+    if @status == 2 || @status == 1
       return
     end
 
-    if @correct_letters.include?(bukva) || @uncorrect_letters.include?(bukva) #Если буквы уже есть в правильновведенных или неправильновведенных - ничего не возвращается
+    if @correct_letters.include?(bukva) || @uncorrect_letters.include?(bukva)
       return
     end
 
@@ -60,9 +61,9 @@ class Game
         if @correct_letters.uniq.sort == word.uniq.sort 
           @status = 1
         end
-    elsif bukva.split("") == word #Предусмотрена возможность сразу ввести слово
+    elsif bukva.split("") == word
       @status = 1
-    elsif bukva == "hint" && @correct_letters.uniq.sort == word.uniq.sort #Чтобы небыло несостыковок, подсказка может завершить игру
+    elsif bukva == "hint" && @correct_letters.uniq.sort == word.uniq.sort
       @status = 1
     elsif bukva == "hint"
       return
@@ -85,7 +86,7 @@ class Game
 
       letter = gets.chomp.downcase
 
-      if letter == "hint" && @counter == 1 #Даю возможность вызвать две подсказки, круто!
+      if letter == "hint" && @counter == 1
         hint = word.uniq.sort - correct_letters.uniq.sort
         correct_letters << hint.sample
         @counter += 1
@@ -106,18 +107,19 @@ class ResultPrinter
   def initialize
     @image_status = []
 
-  visual_path = "/data/visual.txt" #Псевдовизуал.cut не хочу вешать человечка
+  current_path = File.dirname(__FILE__)
+  visual_path = current_path + "/data/visual.txt"
 
   if File.exist?(visual_path)
     visual = File.new(visual_path, "r:UTF-8")
     @image_status = visual.readlines
     visual.close
   else
-    @image_status << "\n [image not found...] \n"
+    @image_status << "\n [ image not found... ] \n"
   end
 
   def image_print(error_counter)
-    puts "Used attempts: #{@image_status[error_counter]}" 
+    puts "Used attempts: #{@image_status[error_counter]}"
   end
 
   def print_status(game)
@@ -126,7 +128,7 @@ class ResultPrinter
     puts "Word: #{hide_word_print(game.word, game.correct_letters)}"
     puts "Errors (#{game.error_counter}): #{game.uncorrect_letters.join(", ")}" 
     puts "You have #{(5 - game.error_counter).to_s} attempts"
-    image_print(game.error_counter) 
+    image_print(game.error_counter)
 
     if game.status == 1
       cls
@@ -161,4 +163,5 @@ class ResultPrinter
     system('cls') || system('clear')
   end
 end
+
 end
